@@ -14,10 +14,10 @@ Set-ADUser -Identity $newuser -HomeDirectory "\\fp01\users\$newuser"-HomeDrive Z
 
 New-PSSession -computername DC2
 Enter-PSSession DC2
-start-adsyncsynccycle
+Start-ADSyncSyncCycle
+Exit-PSSession
 
 
 
-
-Use Exchange Managementshell:
+#Use Exchange Managementshell:
 Enable-RemoteMailbox USERNAME -RemoteRoutingAddress "USERNAME@MYDOMAIN.mail.onmicrosoft.com"
