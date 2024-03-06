@@ -34,5 +34,9 @@ Enter-PSSession DC2
 Start-ADSyncSyncCycle
 Exit-PSSession
 
-#Use Exchange Managementshell:
-Enable-RemoteMailbox USERNAME -RemoteRoutingAddress "USERNAME@MYDOMAIN.mail.onmicrosoft.com"
+Set-ExecutionPolicy RemoteSigned -Force
+$UserCredential = Get-Credential
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://MAIL01.DOMAIN.Local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
+Import-PSSession $Session -DisableNameChecking
+Enable-RemoteMailbox $newuser -RemoteRoutingAddress "$newuser@DOMAIN.mail.onmicrosoft.com"
+Remove-PSSession $Session
