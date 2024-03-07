@@ -4,7 +4,7 @@ $copyuser = Read-Host "Please enter the Username to copy from (Ex. FLast)"
 $newuser = Read-Host "Please enter the new employee Username (Ex. FLast)"
 $firstname = Read-Host "Please enter the new employee's first name"
 $lastname = Read-Host "Please enter the new employee's last name"
-$email = "$newuser@cmhacc.org"
+$email = "$newuser@DOMAIN.org"
 $display = "$firstname $lastname"
 $accountpassword = Read-Host "Please enter a password" -AsSecureString
 
@@ -29,14 +29,13 @@ $existingAcl | Set-Acl -Path \\fp01\Users\$newuser
 (Get-ACL -Path "\\fp01\Users\$newuser").Access | Format-Table IdentityReference,FileSystemRights,AccessControlType,IsInherited,InheritanceFlags -AutoSize
 
 #Run AD sync for changes to reflect across environment
-New-PSSession -computername DC2
-Enter-PSSession DC2
-Start-ADSyncSyncCycle
-Exit-PSSession
-
 Set-ExecutionPolicy RemoteSigned -Force
 $UserCredential = Get-Credential
+$Session = New-PSSession -ComputerName DC2 -Credential $UserCredential
+Invoke-Command -Session $Session -ScriptBlock {Start-ADSyncSyncCycle -PolicyType Delta}
+Remove-PSSession $Session
+
 $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://MAIL01.DOMAIN.Local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
-Import-PSSession $Session -DisableNameChecking
+Import-PSSession $Session -AllowClobber
 Enable-RemoteMailbox $newuser -RemoteRoutingAddress "$newuser@DOMAIN.mail.onmicrosoft.com"
 Remove-PSSession $Session
