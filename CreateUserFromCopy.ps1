@@ -7,11 +7,15 @@ $lastname = Read-Host "Please enter the new employee's last name"
 $email = "$newuser@DOMAIN.org"
 $display = "$firstname $lastname"
 $accountpassword = Read-Host "Please enter a password" -AsSecureString
+$groups = 'AllUsers','Office 365 Standard','Webex','ZoomSSO','VPNAccess','CompanyMileageSSO'
+
 
 $newuserattributes = Get-ADUser -Identity $copyuser -Properties StreetAddress,City,State,PostalCode,Office,Department,Title,Manager,ScriptPath,TelephoneNumber,Description,Fax,Company
-New-ADUser -Name $display -GivenName $firstname -Surname $lastname -SAMAccountName $newuser -Instance $newuserattributes -DisplayName $display -UserPrincipalName $email -path "OU=Employees,DC=DOMAIN,DC=local" -AccountPassword $accountpassword -ChangePasswordAtLogon $false -Enabled $true
-Get-ADUser -Identity $copyuser -Properties memberof | Select-Object -ExpandProperty memberof | Add-ADGroupMember -Members $newuser
+New-ADUser -Name $display -GivenName $firstname -Surname $lastname -SAMAccountName $newuser -Instance $newuserattributes -DisplayName $display -UserPrincipalName $email -path "OU=Employees,DC=Domain,DC=local" -AccountPassword $accountpassword -ChangePasswordAtLogon $false -Enabled $true
 Set-ADUser -Identity $newuser -HomeDirectory "\\fp01\users\$newuser" -HomeDrive Z: -EmailAddress $email
+foreach($group in $groups){
+    Add-ADGroupMember -Identity $group -Members $newuser
+}
 
 #Create the home folder for new user
 New-Item -Path "\\fp01\Users" -Name "$newuser" -Type Directory
